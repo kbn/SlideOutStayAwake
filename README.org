@@ -1,0 +1,7 @@
+* SlideOutStayAwake
+
+Extremely simple app/service to keep an Android device from going to sleep while the hardware keyboard is open.
+Will not unlock the device if it is already locked when the keyboard is opened.
+
+Basically, my "Hello World" app for Android which scratches the above mentioned itch.
+For some reason I could not find an existing way to get this behaviour in (stock) android.

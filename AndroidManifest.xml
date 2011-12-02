@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="no.cavatina.slideoutstayawake"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="5" />
+
+    <application android:icon="@drawable/icon" android:label="@string/app_name">
+		<activity
+			android:name=".StartMeUp"
+			android:label="@string/app_name">
+			<intent-filter>
+				<action
+					android:name="android.intent.action.MAIN" />
+				<category
+					android:name="android.intent.category.LAUNCHER" />					
+			</intent-filter>
+		</activity>
+		<service
+			android:name=".SlideOutStayAwakeService"
+			android:process=":remote">
+			<intent-filter>
+				<action
+					android:name="no.cavatina.slideoutstayawake.SlideOutStayAwakeService" />
+			</intent-filter>
+		</service>
+		
+		<receiver
+			android:name=".BootReceiver">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+			</intent-filter>
+		</receiver>
+<!--
+		<receiver
+			android:name=".SlideOutReceiver">
+			<intent-filter>
+				<action android:name="android.intent" />
+			</intent-filter>
+		</receiver>
+		  -->
+    </application>
+    
+    <uses-permission
+    	android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+    	android:name="android.permission.WAKE_LOCK" />
+</manifest>
