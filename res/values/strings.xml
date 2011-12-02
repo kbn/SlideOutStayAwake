@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World!</string>
     <string name="app_name">SlideOutStayAwake</string>
+    <string name="service">Service</string>
+    <string name="enabled">Enabled</string>
+    <string name="enabled_summary">Enable background service to keep device awake</string>
+    <string name="boot">Start at boot</string>
+    <string name="boot_summary">Start the background service automatically at boot</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
 </resources>

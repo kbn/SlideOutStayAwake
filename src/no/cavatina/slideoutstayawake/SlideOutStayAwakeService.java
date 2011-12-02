@@ -37,14 +37,16 @@ public class SlideOutStayAwakeService extends Service {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BCAST_CONFIGCHANGED);
 		this.registerReceiver(mBroadcastReceiver, filter);
+
+		setWakeLock();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy()");
-		if (wl != null && wl.isHeld())
-			wl.release();
+		setWakeLock(false);
+		this.unregisterReceiver(mBroadcastReceiver);
 	}
 
 	public void setWakeLock(boolean lock) {
@@ -61,25 +63,27 @@ public class SlideOutStayAwakeService extends Service {
 		}
 	}
 
+	public void setWakeLock() {
+		switch (getResources().getConfiguration().hardKeyboardHidden) {
+		case Configuration.HARDKEYBOARDHIDDEN_NO:
+			Log.d(TAG, "Keyboard out!");
+			setWakeLock(true);
+			break;
+		case Configuration.HARDKEYBOARDHIDDEN_YES:
+			Log.d(TAG, "Keyboard in!");
+			setWakeLock(false);
+			break;
+		default:
+			break;
+		}
+	}
+
 	public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent myIntent) {
-
 			if (myIntent.getAction().equals(BCAST_CONFIGCHANGED)) {
-
 				Log.d(TAG, "received->" + BCAST_CONFIGCHANGED);
-				switch (getResources().getConfiguration().hardKeyboardHidden) {
-				case Configuration.HARDKEYBOARDHIDDEN_NO:
-					Log.d(TAG, "Keyboard out!");
-					setWakeLock(true);
-					break;
-				case Configuration.HARDKEYBOARDHIDDEN_YES:
-					Log.d(TAG, "Keyboard in!");
-					setWakeLock(false);
-					break;
-				default:
-					break;
-				}
+				setWakeLock();
 			}
 		}
 	};

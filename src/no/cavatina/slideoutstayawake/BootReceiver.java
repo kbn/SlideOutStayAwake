@@ -9,12 +9,18 @@ package no.cavatina.slideoutstayawake;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class BootReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Intent serviceIntent = new Intent(SlideOutStayAwakeService.class.getName());
-		context.startService(serviceIntent);
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean start = p.getBoolean("boot", true);
+		if (start == true) {
+			Intent serviceIntent = new Intent(SlideOutStayAwakeService.class.getName());
+			context.startService(serviceIntent);
+		}
 	}
 }

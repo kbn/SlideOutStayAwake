@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:key="service"
+		android:title="@string/service">
+		<CheckBoxPreference android:key="enabled"
+			android:title="@string/enabled" android:defaultValue="true"
+			android:summary="@string/enabled_summary"></CheckBoxPreference>
+		<CheckBoxPreference android:key="boot"
+			android:title="@string/boot" android:defaultValue="true"
+			android:summary="@string/boot_summary"></CheckBoxPreference>
+	</PreferenceCategory>
+</PreferenceScreen>

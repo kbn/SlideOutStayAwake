@@ -7,7 +7,7 @@
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
 		<activity
-			android:name=".StartMeUp"
+			android:name=".Preferences"
 			android:label="@string/app_name">
 			<intent-filter>
 				<action
@@ -31,14 +31,7 @@
 				<action android:name="android.intent.action.BOOT_COMPLETED" />
 			</intent-filter>
 		</receiver>
-<!--
-		<receiver
-			android:name=".SlideOutReceiver">
-			<intent-filter>
-				<action android:name="android.intent" />
-			</intent-filter>
-		</receiver>
-		  -->
+
     </application>
     
     <uses-permission
