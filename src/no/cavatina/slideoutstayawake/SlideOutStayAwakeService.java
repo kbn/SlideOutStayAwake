@@ -22,7 +22,7 @@ public class SlideOutStayAwakeService extends Service {
 	private static final String TAG = SlideOutStayAwakeService.class.getSimpleName();
 	private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
 
-	private PowerManager.WakeLock wl;
+	private static PowerManager.WakeLock wl;
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -33,9 +33,6 @@ public class SlideOutStayAwakeService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate()");
-
-		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, TAG);
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BCAST_CONFIGCHANGED);
@@ -50,8 +47,21 @@ public class SlideOutStayAwakeService extends Service {
 			wl.release();
 	}
 
-	public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	public void setWakeLock(boolean lock) {
+		if (wl == null) {
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, TAG);
+		}
 
+		if (lock == true && !wl.isHeld()) {
+			wl.acquire();
+		}
+		else if (lock == false && wl.isHeld()) {
+			wl.release();
+		}
+	}
+
+	public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent myIntent) {
 
@@ -61,13 +71,11 @@ public class SlideOutStayAwakeService extends Service {
 				switch (getResources().getConfiguration().hardKeyboardHidden) {
 				case Configuration.HARDKEYBOARDHIDDEN_NO:
 					Log.d(TAG, "Keyboard out!");
-					if (!wl.isHeld())
-						wl.acquire();
+					setWakeLock(true);
 					break;
 				case Configuration.HARDKEYBOARDHIDDEN_YES:
 					Log.d(TAG, "Keyboard in!");
-					if (wl.isHeld())
-						wl.release();
+					setWakeLock(false);
 					break;
 				default:
 					break;
