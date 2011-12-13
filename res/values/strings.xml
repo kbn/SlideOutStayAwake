@@ -8,7 +8,7 @@
     <string name="boot">Start at boot</string>
     <string name="boot_summary">Start the background service automatically at boot</string>
     <string name="level">Wake level</string>
-    <string name="level_summary">Should the device be allowed to dim the screen or not?</string>
+    <string name="level_summary">Just how awake should the device be?</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 </resources>

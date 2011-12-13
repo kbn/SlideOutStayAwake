@@ -58,6 +58,8 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		String level = p.getString("level", "dim");
 		if (level.equalsIgnoreCase("full"))
 			return PowerManager.FULL_WAKE_LOCK;
+		if (level.equalsIgnoreCase("dim_on_battery"))
+			return SlideOutStayAwakeService.DIM_ON_BATTERY;
 		else
 			return PowerManager.SCREEN_DIM_WAKE_LOCK;
 	}

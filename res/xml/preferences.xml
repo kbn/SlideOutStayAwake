@@ -15,7 +15,7 @@
             android:title="@string/level"
             android:summary="@string/level_summary"
             android:key="level"
-            android:defaultValue="dim"
+            android:defaultValue="dim_on_battery"
             android:entries="@array/listArray"
             android:entryValues="@array/listValues" />
 	</PreferenceCategory>

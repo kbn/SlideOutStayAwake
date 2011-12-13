@@ -13,17 +13,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.os.BatteryManager;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
 public class SlideOutStayAwakeService extends Service {
 
+	public static final int DIM_ON_BATTERY = 0x200;
+
 	private static final String TAG = SlideOutStayAwakeService.class.getSimpleName();
 	private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
+	private static final String POWER_ON = "android.intent.action.ACTION_POWER_CONNECTED";
+	private static final String POWER_OFF = "android.intent.action.ACTION_POWER_DISCONNECTED";
 
 	private static PowerManager.WakeLock wl;
 	private static int wakelevel = PowerManager.SCREEN_DIM_WAKE_LOCK;
+	private static int wakelocktype = PowerManager.SCREEN_DIM_WAKE_LOCK;
+	private static boolean connected = false;
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -35,11 +42,12 @@ public class SlideOutStayAwakeService extends Service {
 		super.onCreate();
 		Log.d(TAG, "onCreate()");
 
+		setConnected(isConnected(getBaseContext()));
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BCAST_CONFIGCHANGED);
+		filter.addAction(POWER_ON);
+		filter.addAction(POWER_OFF);
 		this.registerReceiver(mBroadcastReceiver, filter);
-
-		setWakeLock();
 	}
 
 	@Override
@@ -59,19 +67,22 @@ public class SlideOutStayAwakeService extends Service {
 		this.unregisterReceiver(mBroadcastReceiver);
 	}
 
-	private void setWakeLevel(int wakelevel_) {
-		if (wakelevel_ != wakelevel) {
-			wakelevel = wakelevel_;
-			// Recreate WakeLock if we need another type
-			destroyWakeLock();
-		}
-	}
-
+	/// Make sure we have a WakeLock of the correct type.
 	private void createWakeLock() {
+		int wlt = wakelevel;
+		if (wakelevel == DIM_ON_BATTERY) {
+			if (connected) wlt = PowerManager.FULL_WAKE_LOCK;
+			else wlt = PowerManager.SCREEN_DIM_WAKE_LOCK;
+		}
+		// Recreate WakeLock if we need another type
+		if (wlt != wakelocktype) {
+			destroyWakeLock();
+			wakelocktype = wlt;
+		}
 		if (wl == null) {
-			Log.d(TAG, "createWakeLock(" + wakelevel + ")");
+			Log.d(TAG, "createWakeLock(" + wakelocktype + ")");
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(wakelevel, TAG);
+			wl = pm.newWakeLock(wakelocktype, TAG);
 		}
 	}
 
@@ -108,11 +119,35 @@ public class SlideOutStayAwakeService extends Service {
 		}
 	}
 
-	public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+	private void setWakeLevel(int wakelevel_) {
+		wakelevel = wakelevel_;
+	}
+
+	public void setConnected(boolean connected_) {
+		connected = connected_;
+	}
+
+    public static boolean isConnected(Context context) {
+        Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+    }
+
+    public BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent myIntent) {
 			if (myIntent.getAction().equals(BCAST_CONFIGCHANGED)) {
 				Log.d(TAG, "received->" + BCAST_CONFIGCHANGED);
+				setWakeLock();
+			}
+			else if (myIntent.getAction().equals(POWER_ON)) {
+				Log.d(TAG, "received->" + myIntent.getAction());
+				setConnected(true);
+				setWakeLock();
+			}
+			else if (myIntent.getAction().equals(POWER_OFF)) {
+				Log.d(TAG, "received->" + myIntent.getAction());
+				setConnected(false);
 				setWakeLock();
 			}
 		}

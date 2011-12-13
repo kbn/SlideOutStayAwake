@@ -2,11 +2,13 @@
 <resources>
 	<string-array name="listArray">
 		<item>Dim Screen</item>
+		<item>Dim if on battery</item>
 		<item>Full (battery drain!)</item>
 	</string-array>
 
 	<string-array name="listValues">
 		<item>dim</item>
+		<item>dim_on_battery</item>
 		<item>full</item>
 	</string-array>
 </resources>
