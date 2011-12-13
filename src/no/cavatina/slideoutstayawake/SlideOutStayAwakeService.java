@@ -23,6 +23,7 @@ public class SlideOutStayAwakeService extends Service {
 	private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
 
 	private static PowerManager.WakeLock wl;
+	private static int wakelevel = PowerManager.SCREEN_DIM_WAKE_LOCK;
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -42,18 +43,47 @@ public class SlideOutStayAwakeService extends Service {
 	}
 
 	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		int lt = intent.getIntExtra("level", wakelevel);
+		Log.d(TAG, "onStartCommand(" + lt + ")");
+		setWakeLevel(lt);
+		setWakeLock();
+		return START_STICKY;
+	}
+
+	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy()");
-		setWakeLock(false);
+		destroyWakeLock();
 		this.unregisterReceiver(mBroadcastReceiver);
 	}
 
-	public void setWakeLock(boolean lock) {
-		if (wl == null) {
-			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, TAG);
+	private void setWakeLevel(int wakelevel_) {
+		if (wakelevel_ != wakelevel) {
+			wakelevel = wakelevel_;
+			// Recreate WakeLock if we need another type
+			destroyWakeLock();
 		}
+	}
+
+	private void createWakeLock() {
+		if (wl == null) {
+			Log.d(TAG, "createWakeLock(" + wakelevel + ")");
+			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			wl = pm.newWakeLock(wakelevel, TAG);
+		}
+	}
+
+	private void destroyWakeLock() {
+		if (wl != null) {
+			if (wl.isHeld()) wl.release();
+			wl = null;
+		}
+	}
+
+	private void setWakeLock(boolean lock) {
+		createWakeLock();
 
 		if (lock == true && !wl.isHeld()) {
 			wl.acquire();

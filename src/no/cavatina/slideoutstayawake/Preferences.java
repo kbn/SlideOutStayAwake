@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -39,20 +40,32 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences pref, String key) {
-		if (key.equals("enabled")) {
+		if (key.equals("enabled") || key.equals("level")) {
 			if (isEnabled())
 				startService();
 			else
 				stopService();
 		}
 	}
+
 	public boolean isEnabled() {
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
-		return p.getBoolean("enabled", true);		
+		return p.getBoolean("enabled", true);
+	}
+
+	public int getWakeLevel() {
+		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+		String level = p.getString("level", "dim");
+		if (level.equalsIgnoreCase("full"))
+			return PowerManager.FULL_WAKE_LOCK;
+		else
+			return PowerManager.SCREEN_DIM_WAKE_LOCK;
 	}
 	
 	public void startService() {
-		startService(new Intent(SlideOutStayAwakeService.class.getName()));		
+		Intent intent = new Intent(SlideOutStayAwakeService.class.getName());
+		intent.putExtra("level", getWakeLevel());
+		startService(intent);
 	}
 
 	public void stopService() {

@@ -9,4 +9,14 @@
 			android:title="@string/boot" android:defaultValue="true"
 			android:summary="@string/boot_summary"></CheckBoxPreference>
 	</PreferenceCategory>
+	<PreferenceCategory android:key="wakelock"
+		android:title="@string/wakelock">
+        <ListPreference
+            android:title="@string/level"
+            android:summary="@string/level_summary"
+            android:key="level"
+            android:defaultValue="dim"
+            android:entries="@array/listArray"
+            android:entryValues="@array/listValues" />
+	</PreferenceCategory>
 </PreferenceScreen>
