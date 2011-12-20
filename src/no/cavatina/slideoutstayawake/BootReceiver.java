@@ -20,6 +20,7 @@ public class BootReceiver extends BroadcastReceiver {
 		boolean start = p.getBoolean("boot", true);
 		if (start == true) {
 			Intent serviceIntent = new Intent(SlideOutStayAwakeService.class.getName());
+			serviceIntent.putExtra("level", Preferences.getWakeLevel(p));
 			context.startService(serviceIntent);
 		}
 	}

@@ -16,6 +16,19 @@ import android.preference.PreferenceManager;
 import android.view.View;
 
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+
+	public static final int DIM_ON_BATTERY = 0x200;
+
+	public static int getWakeLevel(SharedPreferences p) {
+		String level = p.getString("level", "dim");
+		if (level.equalsIgnoreCase("full"))
+			return PowerManager.FULL_WAKE_LOCK;
+		if (level.equalsIgnoreCase("dim_on_battery"))
+			return DIM_ON_BATTERY;
+		else
+			return PowerManager.SCREEN_DIM_WAKE_LOCK;		
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,13 +68,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 	public int getWakeLevel() {
 		SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
-		String level = p.getString("level", "dim");
-		if (level.equalsIgnoreCase("full"))
-			return PowerManager.FULL_WAKE_LOCK;
-		if (level.equalsIgnoreCase("dim_on_battery"))
-			return SlideOutStayAwakeService.DIM_ON_BATTERY;
-		else
-			return PowerManager.SCREEN_DIM_WAKE_LOCK;
+		return getWakeLevel(p);
 	}
 	
 	public void startService() {

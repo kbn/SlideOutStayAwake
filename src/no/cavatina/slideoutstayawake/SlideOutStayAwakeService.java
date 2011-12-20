@@ -20,8 +20,6 @@ import android.util.Log;
 
 public class SlideOutStayAwakeService extends Service {
 
-	public static final int DIM_ON_BATTERY = 0x200;
-
 	private static final String TAG = SlideOutStayAwakeService.class.getSimpleName();
 	private static final String BCAST_CONFIGCHANGED = "android.intent.action.CONFIGURATION_CHANGED";
 	private static final String POWER_ON = "android.intent.action.ACTION_POWER_CONNECTED";
@@ -41,20 +39,29 @@ public class SlideOutStayAwakeService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate()");
-
-		setConnected(isConnected(getBaseContext()));
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(BCAST_CONFIGCHANGED);
-		filter.addAction(POWER_ON);
-		filter.addAction(POWER_OFF);
-		this.registerReceiver(mBroadcastReceiver, filter);
+		try {
+			setConnected(isConnected(getBaseContext()));
+			IntentFilter filter = new IntentFilter();
+			filter.addAction(BCAST_CONFIGCHANGED);
+			filter.addAction(POWER_ON);
+			filter.addAction(POWER_OFF);
+			this.registerReceiver(mBroadcastReceiver, filter);
+		}
+		catch (Exception e) {
+			Log.d(TAG, e.getMessage());
+		}
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		int lt = intent.getIntExtra("level", wakelevel);
-		Log.d(TAG, "onStartCommand(" + lt + ")");
-		setWakeLevel(lt);
+		if (intent != null) {
+			int lt = intent.getIntExtra("level", wakelevel);
+			Log.d(TAG, "onStartCommand(" + lt + ")");
+			setWakeLevel(lt);
+		}
+		else {
+			Log.d(TAG, "onStartCommand(0, " + wakelevel + ")");
+		}
 		setWakeLock();
 		return START_STICKY;
 	}
@@ -70,7 +77,7 @@ public class SlideOutStayAwakeService extends Service {
 	/// Make sure we have a WakeLock of the correct type.
 	private void createWakeLock() {
 		int wlt = wakelevel;
-		if (wakelevel == DIM_ON_BATTERY) {
+		if (wakelevel == Preferences.DIM_ON_BATTERY) {
 			if (connected) wlt = PowerManager.FULL_WAKE_LOCK;
 			else wlt = PowerManager.SCREEN_DIM_WAKE_LOCK;
 		}
@@ -94,13 +101,18 @@ public class SlideOutStayAwakeService extends Service {
 	}
 
 	private void setWakeLock(boolean lock) {
-		createWakeLock();
+		try {
+			createWakeLock();
 
-		if (lock == true && !wl.isHeld()) {
-			wl.acquire();
+			if (lock == true && !wl.isHeld()) {
+				wl.acquire();
+			}
+			else if (lock == false && wl.isHeld()) {
+				wl.release();
+			}
 		}
-		else if (lock == false && wl.isHeld()) {
-			wl.release();
+		catch (Exception e) {
+			Log.d(TAG, e.getMessage());
 		}
 	}
 
